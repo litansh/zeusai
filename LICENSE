@@ -1,0 +1,77 @@
+MIT License
+
+Copyright (c) 2024 ZeusAI
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+## Additional Terms for ZeusAI Platform
+
+### Third-Party Components
+
+This software includes third-party components and libraries that are subject to their own licenses:
+
+- **FastAPI**: MIT License
+- **React**: MIT License
+- **PostgreSQL**: PostgreSQL License
+- **Redis**: BSD 3-Clause License
+- **Prometheus**: Apache License 2.0
+- **Grafana**: Apache License 2.0
+- **Docker**: Apache License 2.0
+- **Terraform**: Mozilla Public License 2.0
+
+### Cloud Provider APIs
+
+When using ZeusAI with cloud providers (AWS, Azure, GCP), you are subject to the respective cloud provider's terms of service and pricing.
+
+### Data and Privacy
+
+- ZeusAI may collect usage analytics to improve the platform
+- User data is processed according to our Privacy Policy
+- Infrastructure configurations and designs are stored locally by default
+- Cloud credentials are never stored in plain text
+
+### Support and Warranty
+
+- This software is provided as-is without warranty
+- Commercial support is available through ZeusAI
+- Community support is available through GitHub Issues
+- No guarantee of uptime or service availability
+
+### Commercial Use
+
+- Free for personal and educational use
+- Commercial use requires a valid license
+- Enterprise features require enterprise licensing
+- Contact ZeusAI for commercial licensing options
+
+### Attribution
+
+When using ZeusAI in public projects or presentations, please include:
+- "Powered by ZeusAI" with a link to https://zeusai.com
+- ZeusAI logo and branding guidelines available upon request
+
+### Updates and Modifications
+
+- ZeusAI reserves the right to modify this license
+- Users will be notified of significant changes
+- Continued use constitutes acceptance of updated terms
+
+For questions about licensing, contact: legal@zeusai.com

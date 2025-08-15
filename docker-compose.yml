@@ -1,0 +1,225 @@
+version: '3.8'
+
+services:
+  # Frontend Dashboard
+  zeusai-ui:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+      - REACT_APP_WS_URL=ws://localhost:8000/ws
+    depends_on:
+      - zeusai-orchestrator
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+  # Main Orchestrator
+  zeusai-orchestrator:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://zeusai:zeusai@postgres:5432/zeusai
+      - REDIS_URL=redis://redis:6379
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+    depends_on:
+      - postgres
+      - redis
+      - prometheus
+      - grafana
+      - loki
+    volumes:
+      - ./backend:/app
+      - ./terraform:/terraform
+      - ./logs:/app/logs
+
+  # MCP Microservices
+  obs-mcp:
+    build:
+      context: ./backend/mcp
+      dockerfile: Dockerfile
+    environment:
+      - SERVICE_NAME=obs-mcp
+      - PROMETHEUS_URL=http://prometheus:9090
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - prometheus
+      - redis
+
+  k8s-mcp:
+    build:
+      context: ./backend/mcp
+      dockerfile: Dockerfile
+    environment:
+      - SERVICE_NAME=k8s-mcp
+      - KUBECONFIG=/kubeconfig
+      - REDIS_URL=redis://redis:6379
+    volumes:
+      - ~/.kube:/kubeconfig:ro
+
+  git-mcp:
+    build:
+      context: ./backend/mcp
+      dockerfile: Dockerfile
+    environment:
+      - SERVICE_NAME=git-mcp
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - REDIS_URL=redis://redis:6379
+
+  cloud-mcp:
+    build:
+      context: ./backend/mcp
+      dockerfile: Dockerfile
+    environment:
+      - SERVICE_NAME=cloud-mcp
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+      - REDIS_URL=redis://redis:6379
+
+  kb-mcp:
+    build:
+      context: ./backend/mcp
+      dockerfile: Dockerfile
+    environment:
+      - SERVICE_NAME=kb-mcp
+      - QDRANT_URL=http://qdrant:6333
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - qdrant
+
+  deploy-mcp:
+    build:
+      context: ./backend/mcp
+      dockerfile: Dockerfile
+    environment:
+      - SERVICE_NAME=deploy-mcp
+      - KUBECONFIG=/kubeconfig
+      - REDIS_URL=redis://redis:6379
+    volumes:
+      - ~/.kube:/kubeconfig:ro
+
+  slo-mcp:
+    build:
+      context: ./backend/mcp
+      dockerfile: Dockerfile
+    environment:
+      - SERVICE_NAME=slo-mcp
+      - PROMETHEUS_URL=http://prometheus:9090
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - prometheus
+
+  tf-migrator:
+    build:
+      context: ./backend/mcp
+      dockerfile: Dockerfile
+    environment:
+      - SERVICE_NAME=tf-migrator
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+      - REDIS_URL=redis://redis:6379
+    volumes:
+      - ./terraform:/terraform
+
+  # Infrastructure Services
+  postgres:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=zeusai
+      - POSTGRES_USER=zeusai
+      - POSTGRES_PASSWORD=zeusai
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  # Observability Stack
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=zeusai
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+
+  loki:
+    image: grafana/loki:latest
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ./monitoring/loki-config.yaml:/etc/loki/local-config.yaml
+
+  fluentbit:
+    image: fluent/fluent-bit:latest
+    volumes:
+      - ./monitoring/fluentbit.conf:/fluent-bit/etc/fluent-bit.conf
+      - ./logs:/logs
+    depends_on:
+      - loki
+
+  # Vector Database for RAG
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant_data:/qdrant/storage
+
+  # Terraform Runner
+  terraform-runner:
+    image: hashicorp/terraform:latest
+    volumes:
+      - ./terraform:/terraform
+      - ~/.aws:/root/.aws:ro
+    working_dir: /terraform
+    environment:
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+
+volumes:
+  postgres_data:
+  redis_data:
+  prometheus_data:
+  grafana_data:
+  qdrant_data:

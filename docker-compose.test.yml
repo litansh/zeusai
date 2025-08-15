@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  # Test Database
+  postgres-test:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: zeusai_test
+      POSTGRES_USER: zeusai
+      POSTGRES_PASSWORD: zeusai
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U zeusai -d zeusai_test"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Test Redis
+  redis-test:
+    image: redis:7-alpine
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_test_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Test Qdrant
+  qdrant-test:
+    image: qdrant/qdrant:latest
+    ports:
+      - "6334:6333"
+    volumes:
+      - qdrant_test_data:/qdrant/storage
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Test Prometheus
+  prometheus-test:
+    image: prom/prometheus:latest
+    ports:
+      - "9091:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_test_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+
+  # Test Grafana
+  grafana-test:
+    image: grafana/grafana:latest
+    ports:
+      - "3002:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: zeusai
+      GF_USERS_ALLOW_SIGN_UP: false
+    volumes:
+      - grafana_test_data:/var/lib/grafana
+    depends_on:
+      - prometheus-test
+
+  # Test Loki
+  loki-test:
+    image: grafana/loki:latest
+    ports:
+      - "3101:3100"
+    volumes:
+      - ./monitoring/loki-config.yaml:/etc/loki/local-config.yaml
+      - loki_test_data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+
+volumes:
+  postgres_test_data:
+  redis_test_data:
+  qdrant_test_data:
+  prometheus_test_data:
+  grafana_test_data:
+  loki_test_data:

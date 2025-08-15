@@ -1,170 +1,345 @@
 # ZeusAI: The DevOps CoPilot
 
 ## Overview
-**ZeusAI** is the ultimate DevOps Copilot – an all-in-one, AI-powered, no-code platform that radically simplifies the entire DevOps lifecycle. Designed for DevOps engineers, platform teams, and developers alike, ZeusAI automates, visualizes, and orchestrates everything from infrastructure provisioning to deployment, monitoring, alerting, cost optimization, and audit.
+**ZeusAI** is the ultimate DevOps CoPilot – an all-in-one, AI-powered, no-code platform that radically simplifies the entire DevOps lifecycle. Designed for DevOps engineers, platform teams, and developers alike, ZeusAI automates, visualizes, and orchestrates everything from infrastructure provisioning to deployment, monitoring, alerting, cost optimization, and audit.
 
 > One dashboard. Zero YAML. Full control.
 
-## Key Concepts
-
-- **AI + Agents + MCP**: ZeusAI is built on the Model Context Protocol (MCP) architecture, combining modular AI tools and microservices with typed APIs, enforced policies, and human approvals.
-- **No-Code Drag & Drop Infra Designer**: Build infrastructure and services visually. ZeusAI auto-generates Terraform code, applies it, opens a PR, and waits for approval – all through one interface.
-- **GitOps-native**: All changes are tracked via Git. ZeusAI opens PRs, triggers CI/CD, and proceeds only after approval.
-- **Unified Dashboard**: Like **DataDog + Kiali + GitHub + Terraform Cloud**, all fused into a visual interface.
-- **Import Terraform State**: ZeusAI parses and visualizes existing environments from Terraform state files.
-- **AWS Connectivity**: Upon deployment, ZeusAI auto-connects to AWS accounts using configured credentials, IAM roles, or STS.
-
----
-
-## Core Features
-
-### 🧠 AI-Powered Orchestrator (FastAPI)
-- Intent routing: maps commands or UI actions to MCP microservices.
-- Guardrail enforcement before execution.
-- Signal aggregation from metrics, logs, and external APIs.
-- Predictive analytics and decision making.
-- Auditable history of every change or denial.
-
-### 🧩 MCP Microservices (Model Context Protocol)
-Each tool is a containerized FastAPI service:
-- `obs-mcp`: Prometheus metrics aggregation & anomaly detection.
-- `k8s-mcp`: Kubernetes interaction (scale, rollout, describe).
-- `git-mcp`: PR generation (Terraform diffs, approvals).
-- `cloud-mcp`: AWS CE, usage metrics, IAM scanning.
-- `kb-mcp`: Vector-based RAG knowledgebase.
-- `deploy-mcp`: Helm/Argo CD deployments.
-- `slo-mcp`: Enforce SLO thresholds for actions.
-- `tf-migrator`: Imports code or existing infra and converts to Terraform.
-
-### 🖱️ Visual Terraform Builder
-- Drag in EC2, VPC, Lambda, EKS, Subnets, etc.
-- Connect resources (e.g., S3 → Lambda trigger).
-- ZeusAI generates Terraform dynamically.
-- PR generated in GitHub, displayed in dashboard.
-- Terraform plan & apply triggered post-approval.
-
-### 🔁 GitOps & CI/CD Automation
-- Follows best practices pipeline:
-  - Terraform fmt, validate, plan
-  - Security scanning (tfsec, checkov)
-  - Unit tests (if applicable)
-  - Deployment via ArgoCD/Helm
-- CI/CD is generic and modular.
-
-### 📊 Observability, Alerting & Logging
-- Metrics via Prometheus + Grafana (embedded).
-- Logs via FluentBit → Loki.
-- AI for anomaly detection and burst prediction.
-- Alert routing (Telegram, Slack, MS Teams) via flags.
-- Dashboards per service and infra unit.
-
-### 🔐 Guardrails & Policy Engine
-- YAML-defined:
-  - Change windows
-  - RBAC labels
-  - Max scaling thresholds
-  - Prod lockdown (e.g., require 2 approvals)
-- Realtime enforcement with clear reasons for blocking.
-- User override tracked and alerted.
-
-### 🧠 Predictive Infra Intelligence
-- AI predicts burst usage based on historical Prometheus data.
-- If a user tries to scale down memory or CPU in a cooldown window, system blocks with justification.
-- All override attempts are audited and escalated.
-
-### 🗃️ Knowledge Base (RAG)
-- Upload `.md`, `.txt`, `.pdf` docs.
-- Ask questions in chat or UI.
-- Sources returned from vector DB.
-
-### 🧾 Full Audit Trail
-- Every action, denied attempt, or override is logged.
-- Optional Postgres for long-term audit.
-
-### 🧳 Multi-Mode Operation
-| Mode        | Flag       | Stack      | Infra Target     |
-|-------------|------------|------------|------------------|
-| Local Dev   | `dev`      | Minikube   | Local             |
-| Staging     | `testing`  | EKS        | AWS Staging       |
-| Production  | `prod`     | EKS        | AWS Production    |
-
-### 🛠 Terraform State Importer
-- Parse existing `.tfstate` files.
-- Visualize the current infrastructure.
-- Resume management from state.
-
-### 📤 Terraform Exporter & Migrator
-- Scan any cloud account.
-- Export resource configurations into Terraform modules.
-- Plan: migrate manually created infra to full GitOps.
-
----
-
-## Technologies
-- **React + Tailwind** (dashboard)
-- **FastAPI** (orchestrator + MCP)
-- **Terraform** (infra source of truth)
-- **Grafana / Prometheus / Loki / Fluentbit** (observability)
-- **Qdrant + OpenAI** (RAG KB)
-- **LangGraph (optional)** (multi-step planning)
-- **Docker Compose / K8s** (runtime)
-
----
-
-## Deployment
+## 🚀 Quick Start
 
 ### Prerequisites
-- macOS/Linux with Docker
+- Docker and Docker Compose
 - Python 3.10+
-- AWS creds
-- GitHub token
-- Telegram bot (optional)
+- Node.js 18+
+- AWS CLI configured (optional for cloud features)
 
-### Steps
-1. `git clone https://github.com/your-org/zeusai`
-2. `cd zeusai && cp .env.example .env`
-3. Fill in credentials
-4. `docker-compose up --build`
-5. Access dashboard on `http://localhost:3000`
-6. Connect to Telegram or Slack for ChatOps
+### Installation
 
----
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/your-org/zeusai.git
+   cd zeusai
+   ```
 
-## Philosophy
-ZeusAI isn’t just a DevOps tool. It’s DevOps **liberation**. One pane. Zero YAML. Everything automated and visual, with AI and policies protecting your infrastructure from human error.
+2. **Set up environment variables**
+   ```bash
+   cp env.example .env
+   # Edit .env with your credentials
+   ```
 
-- GitOps native.
-- Infra-as-Code first.
-- Secure by default.
-- Built for scale and self-healing.
-- Designed to onboard junior engineers without risk.
+3. **Start the platform**
+   ```bash
+   docker-compose up --build
+   ```
 
----
+4. **Access the dashboard**
+   - Frontend: http://localhost:3000
+   - Backend API: http://localhost:8000
+   - Grafana: http://localhost:3001 (admin/zeusai)
+   - Prometheus: http://localhost:9090
 
-## Architecture Diagram
-```mermaid
-graph TD
-  UI[Drag & Drop UI] -->|intent| Orchestrator
-  Orchestrator -->|validate| Guardrails
-  Orchestrator -->|call| git-mcp
-  Orchestrator -->|metrics| obs-mcp
-  Orchestrator -->|scale| k8s-mcp
-  Orchestrator -->|deploy| deploy-mcp
-  Orchestrator -->|kb query| kb-mcp
-  Orchestrator -->|predict| slo-mcp
-  Orchestrator -->|scan| tf-migrator
-  git-mcp --> GitHub
-  obs-mcp --> Prometheus
-  kb-mcp --> Qdrant
-  deploy-mcp --> Helm
-  k8s-mcp --> EKS
+## 🏗️ Architecture
+
+### Core Components
+
+#### 🧠 AI-Powered Orchestrator (FastAPI)
+- **Intent routing**: Maps commands or UI actions to MCP microservices
+- **Guardrail enforcement**: Policy-based validation before execution
+- **Signal aggregation**: Metrics, logs, and external APIs
+- **Predictive analytics**: AI-driven decision making
+- **Auditable history**: Complete audit trail of all changes
+
+#### 🧩 MCP Microservices (Model Context Protocol)
+Each tool is a containerized FastAPI service:
+- `obs-mcp`: Prometheus metrics aggregation & anomaly detection
+- `k8s-mcp`: Kubernetes interaction (scale, rollout, describe)
+- `git-mcp`: PR generation (Terraform diffs, approvals)
+- `cloud-mcp`: AWS CE, usage metrics, IAM scanning
+- `kb-mcp`: Vector-based RAG knowledgebase
+- `deploy-mcp`: Helm/Argo CD deployments
+- `slo-mcp`: Enforce SLO thresholds for actions
+- `tf-migrator`: Imports code or existing infra and converts to Terraform
+
+#### 🖱️ Visual Terraform Builder
+- **Drag & Drop Interface**: Build infrastructure visually
+- **Auto-generation**: ZeusAI generates Terraform dynamically
+- **GitOps Integration**: PRs created automatically
+- **State Management**: Import and visualize existing infrastructure
+
+#### 🔁 GitOps & CI/CD Automation
+- **Best Practices Pipeline**: Terraform fmt, validate, plan
+- **Security Scanning**: tfsec, checkov integration
+- **Team-based Approvals**: RBAC with GitHub integration
+- **Auto-triggered**: CI/CD on PR approvals
+
+#### 📊 Observability Stack
+- **Metrics**: Prometheus + Grafana (embedded)
+- **Logs**: FluentBit → Loki
+- **AI Anomaly Detection**: Predictive scaling and remediation
+- **Alerting**: Telegram, Slack, MS Teams integration
+
+#### 🔐 Guardrails & Policy Engine
+- **YAML-defined Policies**: Change windows, RBAC, scaling limits
+- **Real-time Enforcement**: Clear blocking reasons
+- **Override Tracking**: Audited user overrides
+- **Team Permissions**: Multi-team support with fallback reviewers
+
+## 🎯 Key Features
+
+### 🧠 AI-Powered Infrastructure Design
+- **Visual Designer**: Drag & drop infrastructure components
+- **Smart Recommendations**: AI suggests optimal configurations
+- **Cost Optimization**: Real-time cost analysis and recommendations
+- **Best Practices**: Enforced security and performance standards
+
+### 🔄 GitOps-Native Workflow
+- **Zero YAML**: Visual interface generates all configurations
+- **PR-Based Changes**: All changes go through GitHub PRs
+- **Approval Workflows**: Team-based approval processes
+- **Audit Trail**: Complete history of all changes
+
+### 📊 Unified Observability
+- **Single Dashboard**: Metrics, logs, and alerts in one place
+- **AI Anomaly Detection**: Predictive scaling and issue detection
+- **Cost Monitoring**: Real-time cost tracking and optimization
+- **Performance Insights**: AI-driven performance recommendations
+
+### 🛡️ Enterprise Security
+- **RBAC**: Role-based access control
+- **Guardrails**: Policy enforcement at every step
+- **Audit Logging**: Complete audit trail
+- **Compliance**: SOC2, HIPAA, GDPR ready
+
+## 🛠️ Technology Stack
+
+### Backend
+- **FastAPI**: High-performance async API framework
+- **PostgreSQL**: Primary database with audit logging
+- **Redis**: Caching and session management
+- **Prometheus**: Metrics collection and monitoring
+- **Loki**: Log aggregation and querying
+- **Qdrant**: Vector database for RAG
+
+### Frontend
+- **React 18**: Modern UI framework
+- **Tailwind CSS**: Utility-first CSS framework
+- **Recharts**: Data visualization
+- **Monaco Editor**: Code editing (Terraform preview)
+- **React DnD**: Drag and drop functionality
+
+### Infrastructure
+- **Docker Compose**: Local development and testing
+- **Kubernetes**: Production deployment
+- **Terraform**: Infrastructure as Code
+- **Helm**: Kubernetes package management
+
+### AI/ML
+- **OpenAI GPT**: Natural language processing
+- **Vector Embeddings**: Document search and retrieval
+- **Anomaly Detection**: Predictive analytics
+- **Recommendation Engine**: Infrastructure optimization
+
+## 📖 Usage Guide
+
+### 1. Infrastructure Design
+
+1. **Navigate to Infrastructure Designer**
+   - Go to http://localhost:3000/infrastructure
+
+2. **Drag & Drop Components**
+   - Select components from the palette
+   - Drop them onto the canvas
+   - Configure each component's settings
+
+3. **Generate Terraform**
+   - Click "Generate Terraform" to create IaC
+   - Review the generated code
+   - Submit for approval
+
+4. **Deploy Infrastructure**
+   - Approve the PR in GitHub
+   - Monitor deployment progress
+   - View real-time status updates
+
+### 2. Observability & Monitoring
+
+1. **View Dashboard**
+   - Access unified metrics at http://localhost:3000/observability
+   - Monitor system health and performance
+   - View cost analysis and trends
+
+2. **Set Up Alerts**
+   - Configure alert thresholds
+   - Choose notification channels (Slack, Telegram)
+   - Test alert delivery
+
+3. **AI Insights**
+   - Review AI-generated recommendations
+   - Implement performance optimizations
+   - Monitor cost savings
+
+### 3. Deployment Management
+
+1. **Create Deployments**
+   - Use the deployment interface
+   - Configure deployment strategies
+   - Set up rollback procedures
+
+2. **Monitor Deployments**
+   - Track deployment progress
+   - View deployment history
+   - Analyze deployment metrics
+
+3. **Automated Rollbacks**
+   - Configure automatic rollback triggers
+   - Monitor SLO compliance
+   - Review rollback decisions
+
+## 🔧 Configuration
+
+### Environment Variables
+
+```bash
+# AWS Configuration
+AWS_ACCESS_KEY_ID=your_aws_access_key
+AWS_SECRET_ACCESS_KEY=your_aws_secret_key
+AWS_DEFAULT_REGION=us-west-2
+
+# GitHub Configuration
+GITHUB_TOKEN=your_github_personal_access_token
+GITHUB_REPO=your-org/zeusai-infra
+
+# OpenAI Configuration
+OPENAI_API_KEY=your_openai_api_key
+
+# Database Configuration
+DATABASE_URL=postgresql://zeusai:zeusai@postgres:5432/zeusai
+REDIS_URL=redis://redis:6379
+
+# Application Configuration
+ENVIRONMENT=development
+LOG_LEVEL=INFO
+SECRET_KEY=your-secret-key-here
 ```
 
+### Guardrails Configuration
+
+```yaml
+guardrails:
+  change_windows:
+    production:
+      allowed_hours: [2, 3, 4, 5]  # 2 AM to 5 AM UTC
+      timezone: "UTC"
+  
+  rbac:
+    admin: ["*"]
+    dev: ["read", "deploy"]
+    viewer: ["read"]
+  
+  scaling_limits:
+    max_instances: 100
+    max_memory_gb: 512
+    max_cpu_cores: 64
+  
+  prod_lockdown:
+    enabled: true
+    required_approvals: 2
+```
+
+## 🚀 Deployment
+
+### Local Development
+```bash
+# Start all services
+docker-compose up --build
+
+# View logs
+docker-compose logs -f zeusai-orchestrator
+
+# Access services
+# Frontend: http://localhost:3000
+# API: http://localhost:8000
+# Grafana: http://localhost:3001
+```
+
+### Production Deployment
+
+1. **Kubernetes Deployment**
+   ```bash
+   kubectl apply -f k8s/
+   ```
+
+2. **Helm Chart**
+   ```bash
+   helm install zeusai ./helm/zeusai
+   ```
+
+3. **Terraform**
+   ```bash
+   terraform init
+   terraform plan
+   terraform apply
+   ```
+
+## 🔍 Monitoring & Troubleshooting
+
+### Health Checks
+- **API Health**: `GET /health`
+- **Service Status**: Check individual MCP service health
+- **Database**: PostgreSQL connection status
+- **Redis**: Cache connectivity
+
+### Logs
+- **Application Logs**: `docker-compose logs zeusai-orchestrator`
+- **MCP Services**: `docker-compose logs obs-mcp`
+- **Infrastructure**: Terraform and deployment logs
+
+### Metrics
+- **Prometheus**: http://localhost:9090
+- **Grafana**: http://localhost:3001
+- **Custom Dashboards**: Pre-configured ZeusAI dashboards
+
+## 🤝 Contributing
+
+1. **Fork the repository**
+2. **Create a feature branch**: `git checkout -b feature/amazing-feature`
+3. **Commit your changes**: `git commit -m 'Add amazing feature'`
+4. **Push to the branch**: `git push origin feature/amazing-feature`
+5. **Open a Pull Request**
+
+### Development Setup
+```bash
+# Backend development
+cd backend
+pip install -r requirements.txt
+uvicorn main:app --reload
+
+# Frontend development
+cd frontend
+npm install
+npm start
+```
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- **FastAPI** for the excellent async web framework
+- **React** for the powerful frontend framework
+- **Tailwind CSS** for the utility-first CSS framework
+- **Prometheus** for metrics collection
+- **Grafana** for visualization
+- **Terraform** for infrastructure as code
+
+## 📞 Support
+
+- **Documentation**: [docs.zeusai.com](https://docs.zeusai.com)
+- **Issues**: [GitHub Issues](https://github.com/your-org/zeusai/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/your-org/zeusai/discussions)
+- **Email**: support@zeusai.com
+
 ---
 
-## License
-MIT
-
----
-
-## Made with ❤️ by someone who’s been in war rooms long enough to know the real problem… is repeating yourself.
+**Made with ❤️ by someone who's been in war rooms long enough to know the real problem… is repeating yourself.**
